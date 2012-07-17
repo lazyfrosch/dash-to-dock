@@ -215,7 +215,7 @@ const myDash = new Lang.Class({
                                        display.actor.opacity = 255;
                                    }));
 
-        let item = new Dash.DashItemContainer(this._settings);
+        let item = new myDashItemContainer(this._settings);
         item.setChild(display.actor);
 
         item.setLabelText(app.get_name());
