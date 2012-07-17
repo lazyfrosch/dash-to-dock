@@ -717,11 +717,14 @@ const myDashItemContainer = new Lang.Class({
         this.parent();
 
         this._maxN = 4;
-        this._winsowsChangedId=0;
+        this._settings = settings;
+        this._windowsChangedId=0;
+        this._settingsChangedId=0;
+        this._app = null;
         this._showWindowsIndicators = settings.get_boolean('app-windows-counter');
 
-        settings.connect('changed::app-windows-counter',Lang.bind(this, function(){
-            if(settings.get_boolean('app-windows-counter'))
+        this._settingsChangedId = this._settings.connect('changed::app-windows-counter',Lang.bind(this, function(){
+            if(this._settings.get_boolean('app-windows-counter'))
                 this._enableWindowsCounterIndicator();
             else
                 this._disableWindowsCounterIndicator();
@@ -739,6 +742,8 @@ const myDashItemContainer = new Lang.Class({
 
     _onDestroy: function(){
         this._disableWindowsCounterIndicator();
+        if(this._settingsChangedId>0)
+            this._settings.disconnect(this._settingsChangedId);
     },
 
     _enableWindowsCounterIndicator: function(){
@@ -747,10 +752,11 @@ const myDashItemContainer = new Lang.Class({
         // Filter only app children
         if (this._showWindowsIndicators && this.child && this.child._delegate && this.child._delegate.app){
 
-            this._winsowsChangedId = this.child._delegate.app.connect('windows-changed', 
+            this._app = this.child._delegate.app;
+            this._windowsChangedId = this._app.connect('windows-changed',
                 Lang.bind(this, this._updateCounterClass));
 
-            this.child.connect('destroy', Lang.bind(this, this._onDestroy));
+            this.actor.connect('destroy', Lang.bind(this, this._onDestroy));
 
             this._updateCounterClass();
         }
@@ -758,8 +764,8 @@ const myDashItemContainer = new Lang.Class({
     },
 
     _disableWindowsCounterIndicator: function(){
-        if(this._winsowsChangedId>0)
-            this.child._delegate.app.disconnect(this._winsowsChangedId);
+        if(this._app && this._windowsChangedId>0)
+            this._app.disconnect(this._windowsChangedId);
 
         this._showWindowsIndicators = false;
         this._updateCounterClass();
