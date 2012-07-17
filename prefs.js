@@ -326,8 +326,24 @@ const WorkspaceSettingsWidget = new GObject.Class({
 
     customization.add(showIcons);
 
-    notebook.append_page(customization, customizationTitle);
 
+    /* WINDOWS COUNTER INDICATORS*/
+
+    let windowsCounterControl = new Gtk.Box({margin_left:10, margin_top:10, margin_bottom:5, margin_right:10});
+
+    let windowsCounterLabel = new Gtk.Label({label: "Show a windows counter indicator on each app launcher",
+                                              xalign: 0, hexpand:true});
+    let windowsCounter = new Gtk.Switch({halign:Gtk.Align.END});
+            windowsCounter.set_active(this.settings.get_boolean('app-windows-counter'));
+            windowsCounter.connect('notify::active', Lang.bind(this, function(check){
+                this.settings.set_boolean('app-windows-counter', check.get_active());
+            }));
+    windowsCounterControl.add(windowsCounterLabel);
+    windowsCounterControl.add(windowsCounter);
+
+    customization.add(windowsCounterControl);
+
+    notebook.append_page(customization, customizationTitle);
 
 /*
     let OptionalFeaturesTitle = new Gtk.Label({label: "Optional Features"});

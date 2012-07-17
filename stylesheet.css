@@ -2,4 +2,23 @@
 	padding-right:1px;
 }
 
+.dashtodock-running1 {
+
+	border-image: url('./themes/one.svg');
+}
+
+.dashtodock-running2 {
+
+	border-image: url('./themes/two.svg');
+}
+
+.dashtodock-running3 {
+
+	border-image: url('./themes/three.svg');
+}
+
+.dashtodock-running4 {
+
+	border-image: url('./themes/four.svg');
+}
 

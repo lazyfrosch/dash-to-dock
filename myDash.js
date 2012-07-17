@@ -215,7 +215,7 @@ const myDash = new Lang.Class({
                                        display.actor.opacity = 255;
                                    }));
 
-        let item = new Dash.DashItemContainer();
+        let item = new Dash.DashItemContainer(this._settings);
         item.setChild(display.actor);
 
         item.setLabelText(app.get_name());
@@ -698,3 +698,91 @@ const myDash = new Lang.Class({
 });
 
 Signals.addSignalMethods(myDash.prototype);
+
+
+/**
+ * Extend DashItemContainer
+ *
+ * - Pass settings to the constructor and bind settings changes
+ * - Apply a css class based on the number of windows of each application (#N);
+ *   a class of the form "dashtodock-running#N" is applied to the DashItemCointainer
+ *   actor.
+ *
+ */
+const myDashItemContainer = new Lang.Class({
+    Name: 'dashToDock.DashItemContainer',
+    Extends: Dash.DashItemContainer,
+
+    _init: function(settings) {
+        this.parent();
+
+        this._maxN = 4;
+        this._winsowsChangedId=0;
+        this._showWindowsIndicators = settings.get_boolean('app-windows-counter');
+
+        settings.connect('changed::app-windows-counter',Lang.bind(this, function(){
+            if(settings.get_boolean('app-windows-counter'))
+                this._enableWindowsCounterIndicator();
+            else
+                this._disableWindowsCounterIndicator();
+        }));
+
+    },
+
+    setChild: function(actor) {
+
+        this.parent(actor);
+
+        if(this._showWindowsIndicators)
+            this._enableWindowsCounterIndicator();
+    },
+
+    _onDestroy: function(){
+        this._disableWindowsCounterIndicator();
+    },
+
+    _enableWindowsCounterIndicator: function(){
+        this._showWindowsIndicators = true;
+
+        // Filter only app children
+        if (this._showWindowsIndicators && this.child && this.child._delegate && this.child._delegate.app){
+
+            this._winsowsChangedId = this.child._delegate.app.connect('windows-changed', 
+                Lang.bind(this, this._updateCounterClass));
+
+            this.child.connect('destroy', Lang.bind(this, this._onDestroy));
+
+            this._updateCounterClass();
+        }
+
+    },
+
+    _disableWindowsCounterIndicator: function(){
+        if(this._winsowsChangedId>0)
+            this.child._delegate.app.disconnect(this._winsowsChangedId);
+
+        this._showWindowsIndicators = false;
+        this._updateCounterClass();
+
+    },
+
+    _updateCounterClass: function() {
+
+        let n=-1;
+
+        if(this._showWindowsIndicators){
+            n = this.child._delegate.app.get_n_windows();
+            if(n>this._maxN)
+                 n = this._maxN;
+        }
+
+        for(let i = 1; i<=this._maxN; i++){
+            let className = 'dashtodock-running'+i;
+            if(i!=n)
+                this.actor.remove_style_class_name(className);
+            else
+                this.actor.add_style_class_name(className);
+        }
+    }
+
+});

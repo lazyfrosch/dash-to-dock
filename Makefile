@@ -18,6 +18,8 @@ zip-file: all
 	mkdir -p _build/schemas
 	cp schemas/*.xml _build/schemas/
 	cp schemas/gschemas.compiled _build/schemas/
+	mkdir -p _build/themes
+	cp themes/*.svg _build/themes/
 	cd _build ; \
 	zip -qr "$(UUID).zip" .
 	mv _build/$(UUID).zip ./ 
