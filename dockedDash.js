@@ -410,8 +410,8 @@ dockedDash.prototype = {
     _getBackgroundColor: function() {
 
         // Remove custom style
-        let oldStyle = this.dash._box.get_style() || "";
-        this.dash._box.set_style("");
+        let oldStyle = this.dash._box.get_style();
+        this.dash._box.set_style(null);
 
         let themeNode = this.dash._box.get_theme_node();
         this.dash._box.set_style(oldStyle);
